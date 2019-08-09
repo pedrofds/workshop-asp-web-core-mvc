@@ -17,41 +17,42 @@ namespace SalesWebMvc.Services
             _context = context;
         }
 
-        public List<Seller> FindAll()
+        public async Task<List<Seller>> FindAllAsync()
         {
-            return _context.Seller.Include(obj => obj.Departament).ToList();
+            return await _context.Seller.Include(obj => obj.Departament).ToListAsync();
         }
 
-        public void Insert(Seller seller)
+        public async Task InsertAsync(Seller seller)
         {
             //seller.Departament = _context.Departament.FirstOrDefault();
             _context.Add(seller);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public Seller FindById(int id)
+        public async Task<Seller> FindByIdAsync(int id)
         {
             //Seller seller = _context.Seller.Where(s => s.Id == id).FirstOrDefault();
-            return _context.Seller.Include(s => s.Departament).FirstOrDefault(s => s.Id == id);
+            return await _context.Seller.Include(s => s.Departament).FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public void RemoveSeller(int id)
+        public async Task RemoveSellerAsync(int id)
         {
-            var obj = _context.Seller.Find(id);
+            var obj = await _context.Seller.FindAsync(id);
             _context.Seller.Remove(obj);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
-        public void UpdateSeller(Seller obj)
+        public async Task UpdateSellerAsync(Seller obj)
         {
-            if (!_context.Seller.Any(x => x.Id == obj.Id))
+            bool hasAny = await _context.Seller.AnyAsync(x => x.Id == obj.Id);
+            if (!hasAny)
             {
                 throw new NotFoundException("Id not found");
             }
             try
             {
                 _context.Update(obj);
-                _context.SaveChanges();
+                await _context.SaveChangesAsync();
             }
             catch (DbConcurrencyException e)
             {
